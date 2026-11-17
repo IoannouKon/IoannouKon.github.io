@@ -1,30 +1,48 @@
 (() => {
-  const menu = document.querySelector('.menu-toggle');
-  const nav = document.querySelector('.nav-links');
-  function closeMenu() { if (!menu || !nav) return; nav.classList.remove('open'); menu.setAttribute('aria-expanded','false'); menu.textContent='☰'; }
-  menu?.addEventListener('click', () => { const opened = nav.classList.toggle('open'); menu.setAttribute('aria-expanded', String(opened)); menu.textContent = opened ? '✕' : '☰'; });
-  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click',closeMenu));
-  window.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
-  const year = document.getElementById('year'); if (year) year.textContent = String(new Date().getFullYear());
-  const blocks = {
-    rocket: ['01 / CONTROL','Rocket CPU','Host software issues custom RoCC commands to configure and launch the accelerator. The compute-intensive work runs in the connected LUMIXED unit.'],
-    controller: ['02 / CONTROL','LUMIXED controller','The RoCC-connected controller manages execution states, parameters, accelerator scheduling, and DMA requests.'],
-    memory: ['03 / STORAGE','System memory','Activation tensors, packed quantized weights, and output buffers live in the SoC memory space and are accessed through DMA.'],
-    dma: ['04 / TRANSFER','TileLink DMA engine','LUMIXED issues TileLink memory requests to move activation and weight data into local buffers and write final results to memory.'],
-    products: ['05 / COMPUTE','Product generation and lookup memories','Activation products are generated once for a window and stored in lookup memories for reuse across multiple weight columns.'],
-    selection: ['06 / COMPUTE','Selection and correction','Packed low-bit weights select precomputed products. Sign and odd-weight correction reconstruct each product; double-buffered weights overlap fetch with compute.'],
-    accumulate: ['07 / COMPUTE','Accumulation and writeback','The adder tree combines selected products; partial sums are retained across windows and output values are written back through DMA.']
-  };
-  document.querySelectorAll('[data-part]').forEach(button => button.addEventListener('click', () => {
-    document.querySelectorAll('[data-part]').forEach(b => { b.classList.remove('selected'); b.setAttribute('aria-pressed','false'); });
-    button.classList.add('selected'); button.setAttribute('aria-pressed','true');
-    const item = blocks[button.dataset.part]; if (!item) return;
-    document.getElementById('part-tag').textContent = item[0];
-    document.getElementById('part-title').textContent = item[1];
-    document.getElementById('part-copy').textContent = item[2];
-  }));
+  const menuButton = document.querySelector('.menu-toggle');
+  const menu = document.getElementById('primary-navigation');
+  if (menuButton && menu) {
+    const closeMenu = () => { menu.classList.remove('open'); menuButton.setAttribute('aria-expanded', 'false'); menuButton.textContent = '☰'; };
+    menuButton.addEventListener('click', () => {
+      const isOpen = menu.classList.toggle('open');
+      menuButton.setAttribute('aria-expanded', String(isOpen));
+      menuButton.textContent = isOpen ? '×' : '☰';
+    });
+    menu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
+  }
   document.querySelectorAll('[data-copy-email]').forEach(button => button.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText('ioannou.kosti@gmail.com'); button.textContent = 'Copied email ✓'; }
-    catch { window.location.href='mailto:ioannou.kosti@gmail.com'; }
+    const email = 'ioannou.kosti@gmail.com';
+    try {
+      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(email);
+      else {
+        const input = document.createElement('textarea'); input.value=email; input.style.position='fixed';input.style.opacity='0';document.body.append(input);input.select();
+        if (!document.execCommand('copy')) throw new Error('Copy unavailable');
+        input.remove();
+      }
+      const original=button.textContent;button.textContent='Copied ✓';
+      setTimeout(() => {button.textContent=original;},1800);
+    } catch (err) {window.location.href='mailto:'+email;}
   }));
+  const blocks = [
+    ['Host / RoCC','Rocket software configures and starts LUMIXED through custom RoCC commands. The accelerator is attached to the RISC-V system.'],
+    ['DMA & buffers','A TileLink-based DMA transfers data between system memory and local storage. Weight buffering supports prefetch and reuse.'],
+    ['Product generation','Input activations are used to generate a compact set of reusable even-valued products in LUT-style memories.'],
+    ['Select & accumulate','Weight-controlled selection, odd-product correction, sign handling, and accumulation produce matrix outputs.']
+  ];
+  const buttons=[...document.querySelectorAll('[data-arch-step]')];
+  const title=document.getElementById('arch-title');
+  const detail=document.getElementById('arch-description');
+  if (buttons.length && title && detail) {
+    buttons.forEach((button,index) => button.addEventListener('click',() => {
+      buttons.forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
+      title.textContent=blocks[index][0];detail.textContent=blocks[index][1];
+    }));
+  }
+  const fades=document.querySelectorAll('.fade');
+  if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    const observer=new IntersectionObserver(entries => entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}}),{threshold:.08});
+    fades.forEach(e=>observer.observe(e));
+  } else fades.forEach(e=>e.classList.add('visible'));
+  const year=document.querySelector('[data-current-year]');if(year)year.textContent=new Date().getFullYear();
 })();
