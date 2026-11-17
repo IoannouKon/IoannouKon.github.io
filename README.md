@@ -16,7 +16,7 @@ Visit `http://localhost:8000` (or `http://localhost:8000/projects.html` for the 
 
 - `index.html`: main introduction, project cards, background and contact.
 - `projects.html`: expanding project hub, beginning with LUMIXED and clearly labeled space for future designs.
-- `about.html`: personal story, professional/independent work and interests.
+- `about.html`: personal story, independent hardware projects and interests.
 - `lumixed.html`: technical project page and architecture walkthrough.
 - `style.css`: responsive visual design.
 - `script.js`: menu, interactive architecture selector, copy-email buttons (if used) and viewport transitions.
@@ -53,6 +53,6 @@ LUMIXED is no longer a standalone top navigation item. The main navigation now l
 
 ## v0.8 design update 
 
-The homepage now uses a compact, vertically scrolling list of selected work rather than an uneven masonry grid. LUMIXED comes first, followed by open-source contributions and space software engineering. Future entries can be added as new `.work-row` items. The standalone My Projects page contains only real personal hardware projects (currently LUMIXED); it does **not** display fictitious future projects or large empty placeholders.
+The homepage now uses a compact, vertically scrolling list of selected work rather than an uneven masonry grid. LUMIXED comes first, followed by open-source contributions. The portfolio focuses on personal projects and independent research. Future entries can be added as new `.work-row` items. The standalone My Projects page contains only real personal hardware projects (currently LUMIXED); it does **not** display fictitious future projects or large empty placeholders.
 
 This is a review package; it does not modify the live GitHub Pages `main` branch.
