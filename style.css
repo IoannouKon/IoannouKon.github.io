@@ -110,3 +110,25 @@
 .footprint-sources p{margin-top:14px;max-width:900px}
 .footprint-sources .actions{gap:24px;margin-top:0}
 @media(max-width:800px){.footprint-table{font-size:12px}.footprint-table th,.footprint-table td{padding:14px 10px}}
+
+/* Selectable footprint chart; its values come from the table below. */
+.footprint-chart{margin:0 0 40px;padding:28px;border:1px solid var(--line);border-radius:16px;background:#101d19}
+.footprint-chart[hidden]{display:none}
+.footprint-chart-toolbar{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:32px}
+.footprint-chart [data-footprint-title]{font:600 clamp(22px,3vw,30px)/1.2 'Space Grotesk',Arial,sans-serif;letter-spacing:-.04em}
+.footprint-chart-toolbar label{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px}
+.footprint-chart select{font:500 13px 'DM Sans',Arial,sans-serif;background:#172b23;color:var(--ink);border:1px solid #608575;border-radius:8px;padding:11px 32px 11px 13px;max-width:100%;cursor:pointer}
+.footprint-chart select:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+.footprint-bars{display:flex;flex-direction:column;gap:26px}
+.footprint-bar-row{display:grid;grid-template-columns:155px minmax(0,1fr) 100px;gap:20px;align-items:center}
+.footprint-bar-label{font:600 14px 'Space Grotesk',Arial,sans-serif}
+.footprint-bar-track{height:32px;background:#a3ead408;border-radius:4px;overflow:hidden}
+.footprint-bar-fill{height:100%;width:0;background:#6b8d7e;border-radius:4px;transition:width .45s ease}
+.is-lumixed .footprint-bar-fill{background:var(--mint)}
+.is-lumixed .footprint-bar-label,.is-lumixed .footprint-bar-value{color:var(--mint)}
+.footprint-bar-value{text-align:right;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.footprint-chart-axis{display:flex;justify-content:space-between;margin:12px 120px 0 175px;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.footprint-chart-note{margin-top:22px;color:var(--muted);font-size:12px}
+.footprint-chart-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+@media(max-width:650px){.footprint-chart{padding:20px}.footprint-chart-toolbar{align-items:flex-start;flex-direction:column;gap:16px}.footprint-chart-toolbar label{width:100%;justify-content:space-between}.footprint-chart select{font-size:16px;min-width:0}.footprint-bar-row{grid-template-columns:minmax(0,1fr) auto;gap:8px}.footprint-bar-track{grid-column:1/-1;grid-row:2;height:26px}.footprint-bar-value{grid-column:2;grid-row:1}.footprint-chart-axis{margin:12px 0 0}}
+@media(prefers-reduced-motion:reduce){.footprint-bar-fill{transition:none}}
