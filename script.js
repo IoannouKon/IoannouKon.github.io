@@ -13,16 +13,31 @@
   }
   document.querySelectorAll('[data-copy-email]').forEach(button => button.addEventListener('click', async () => {
     const email = 'ioannou.kosti@gmail.com';
-    try {
-      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(email);
-      else {
-        const input = document.createElement('textarea'); input.value=email; input.style.position='fixed';input.style.opacity='0';document.body.append(input);input.select();
+    const status = button.closest('.contact-methods')?.querySelector('[data-copy-status]');
+    const setStatus = message => { if (status) status.textContent = message; };
+    const copyWithSelection = () => {
+      const input = document.createElement('textarea');
+      input.value = email;
+      input.setAttribute('readonly', '');
+      input.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.append(input);
+      try {
+        input.select();
         if (!document.execCommand('copy')) throw new Error('Copy unavailable');
+      } finally {
         input.remove();
+        button.focus();
       }
-      const original=button.textContent;button.textContent='Copied ✓';
-      setTimeout(() => {button.textContent=original;},1800);
-    } catch (err) {window.location.href='mailto:'+email;}
+    };
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        try { await navigator.clipboard.writeText(email); }
+        catch { copyWithSelection(); }
+      } else copyWithSelection();
+      setStatus('Email address copied.');
+    } catch {
+      setStatus('Please select and copy the email address shown above.');
+    }
   }));
   const blocks = [
     ['Host / RoCC','Rocket software configures and starts LUMIXED through custom RoCC commands. The accelerator is attached to the RISC-V system.'],

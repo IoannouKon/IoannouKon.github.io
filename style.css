@@ -77,3 +77,17 @@
 @media(max-width:800px){.work-row{grid-template-columns:58px minmax(0,1fr);gap:20px;padding:23px 0;min-height:0}.work-thumb{display:none}.work-meta{padding-top:12px}.work-main h3{font-size:clamp(25px,5.5vw,36px)}.work-main p{font-size:14px}.work-footer{align-items:flex-start;flex-direction:column}.work-list-projects .work-row{min-height:0}}
 @media(max-width:480px){.work-row{grid-template-columns:38px minmax(0,1fr);gap:15px;padding:22px 0}.work-number{font-size:24px}.work-date{font-size:8px;white-space:normal;max-width:38px}.work-main .eyebrow{font-size:10px}.work-main h3{font-size:26px}.work-main p{font-size:13.5px}.work-main .tag{font-size:8px;padding:4px 7px}.work-main .tags{margin-top:13px}}
 @media(prefers-reduced-motion:reduce){.work-row,.work-inline-arrow{transition:none}}
+
+/* Contact options work even without a configured email app. */
+.contact-banner::after{pointer-events:none}
+.contact-options{position:relative;z-index:1;width:300px;max-width:100%;align-self:center}
+.contact-options summary{list-style:none}
+.contact-options summary::-webkit-details-marker{display:none}
+.contact-options summary::after{content:"+";margin-left:auto}
+.contact-options[open] summary::after{content:"−"}
+.contact-methods{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding-top:16px}
+.contact-method,.contact-copy{display:block;padding:10px 14px;border:1px solid #425342;border-radius:8px;background:transparent;color:#15201a;text-align:center;font:600 13px 'DM Sans',Arial,sans-serif;cursor:pointer}
+.contact-method:hover,.contact-copy:hover{background:#15201a12}
+.contact-address{font-size:14px;text-align:center;overflow-wrap:anywhere;user-select:all}
+.contact-banner .contact-status{font-size:13px;line-height:1.5;text-align:center}
+@media(max-width:800px){.contact-options{width:100%;max-width:360px}}
