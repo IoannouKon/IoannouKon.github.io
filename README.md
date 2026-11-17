@@ -51,7 +51,7 @@ Then create a draft pull request to review without merging.
 
 LUMIXED is no longer a standalone top navigation item. The main navigation now links to **My Projects**, an expandable page that will accommodate additional hardware designs. The technical `lumixed.html` page remains accessible as the first detailed project. The live `main` branch is not modified by this package.
 
-## v0.8 design update
+## v0.8 design update 
 
 The homepage now uses a compact, vertically scrolling list of selected work rather than an uneven masonry grid. LUMIXED comes first, followed by open-source contributions and space software engineering. Future entries can be added as new `.work-row` items. The standalone My Projects page contains only real personal hardware projects (currently LUMIXED); it does **not** display fictitious future projects or large empty placeholders.
 
