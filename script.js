@@ -134,14 +134,11 @@
     const archive = JSON.parse(cycleData.textContent);
     const batch = document.getElementById('llms-batch');
     const workload = document.getElementById('llms-workload');
-    const counter = document.getElementById('llms-counter');
-    const table = document.getElementById('llms-results-table');
     const bars = cycleChart.querySelector('[data-cycle-bars]');
     const title = cycleChart.querySelector('[data-cycle-title]');
     const axisMax = cycleChart.querySelector('[data-cycle-max]');
     const note = cycleChart.querySelector('[data-cycle-note]');
     const status = cycleChart.querySelector('[role="status"]');
-    const scope = document.getElementById('llms-scope');
     const number = new Intl.NumberFormat('en-US');
     const barRows = new Map();
     const renderCycles = (announce = false) => {
@@ -154,17 +151,14 @@
       const results = dataset.designs.map(design => {
         const cases = design.cases.filter(item => all || item.id === workload.value);
         return { ...design,
-          active: cases.reduce((sum, item) => sum + item.active, 0),
           whole: cases.reduce((sum, item) => sum + item.whole, 0)
         };
       });
-      const metric = counter.value;
-      const maximum = Math.max(...results.map(result => result[metric]));
+      const maximum = Math.max(...results.map(result => result.whole));
       const magnitude = 10 ** Math.floor(Math.log10(maximum || 1));
       const ceiling = [1, 2, 2.5, 5, 10].map(step => step * magnitude)
         .find(step => step >= maximum);
       const activeKeys = new Set();
-      const tableRows = [];
       results.forEach(result => {
         const key = result.brand + ' ' + result.config;
         activeKeys.add(key);
@@ -191,48 +185,22 @@
           barRows.set(key, elements);
         }
         bars.append(elements.row);
-        elements.fill.style.width = (100 * result[metric] / ceiling) + '%';
-        elements.value.textContent = number.format(result[metric]);
-        const row = document.createElement('tr');
-        if (result.kind === 'lumixed') row.className = 'footprint-highlight';
-        const label = document.createElement('th');
-        label.scope = 'row';
-        const link = document.createElement('a');
-        link.href = archive.sourceRepository + '/blob/main/' + result.source;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.textContent = result.brand;
-        const config = document.createElement('span');
-        config.textContent = result.config;
-        label.append(link, config);
-        row.append(label);
-        for (const field of ['active', 'whole']) {
-          const value = document.createElement('td');
-          value.textContent = number.format(result[field]);
-          row.append(value);
-        }
-        tableRows.push(row);
+        elements.fill.style.width = (100 * result.whole / ceiling) + '%';
+        elements.value.textContent = number.format(result.whole);
       });
       for (const [key, elements] of barRows) {
         if (!activeKeys.has(key)) { elements.row.remove(); barRows.delete(key); }
       }
-      table.tBodies[0].replaceChildren(...tableRows);
-      table.caption.textContent = dataset.label + ' · ' + workloadLabel;
-      title.textContent = metric === 'active' ? 'Active accelerator cycles' : 'Whole-call core cycles';
+      title.textContent = 'Whole-call core cycles';
       axisMax.textContent = number.format(ceiling) + ' cycles';
-      scope.textContent = dataset.scope + (all
-        ? ' Totals cover all 12 kernels and exclude smoke checks.'
-        : ' Selected matrix: ' + workloadLabel + ' (R × K × N).');
-      note.textContent = metric === 'active'
-        ? 'Accelerator-active cycles; overlapping diagnostic counters are not added together. Lower is fewer cycles.'
-        : 'Whole-call core cycles include the surrounding software call. Lower is fewer cycles.';
+      note.textContent = 'Lower is fewer cycles.';
       const summary = results.map(result => result.brand + ' ' + result.config + ': ' +
-        number.format(result[metric]) + ' cycles').join('; ');
+        number.format(result.whole) + ' cycles').join('; ');
       bars.setAttribute('aria-label', title.textContent + '. ' + summary);
       if (announce) status.textContent = dataset.label + '. ' + workloadLabel + '. ' + summary;
     };
     renderCycles();
-    for (const control of [batch, workload, counter]) {
+    for (const control of [batch, workload]) {
       control.addEventListener('change', () => renderCycles(true));
     }
     cycleChart.hidden = false;
