@@ -55,7 +55,7 @@
     }));
   }
   const footprintChart = document.getElementById('footprint-chart');
-  const footprintTable = document.querySelector('.footprint-table');
+  const footprintTable = document.querySelector('#hardware-comparison .footprint-table');
   if (footprintChart && footprintTable) {
     const metrics = {
       luts: { column: 1, label: 'LUTs', unit: '' },
@@ -127,6 +127,115 @@
       selector.addEventListener('change', () => renderFootprint(true));
       footprintChart.hidden = false;
     }
+  }
+  const cycleChart = document.getElementById('llms-cycle-chart');
+  const cycleData = document.getElementById('llms-cycle-data');
+  if (cycleChart && cycleData) {
+    const archive = JSON.parse(cycleData.textContent);
+    const batch = document.getElementById('llms-batch');
+    const workload = document.getElementById('llms-workload');
+    const counter = document.getElementById('llms-counter');
+    const table = document.getElementById('llms-results-table');
+    const bars = cycleChart.querySelector('[data-cycle-bars]');
+    const title = cycleChart.querySelector('[data-cycle-title]');
+    const axisMax = cycleChart.querySelector('[data-cycle-max]');
+    const note = cycleChart.querySelector('[data-cycle-note]');
+    const status = cycleChart.querySelector('[role="status"]');
+    const scope = document.getElementById('llms-scope');
+    const number = new Intl.NumberFormat('en-US');
+    const barRows = new Map();
+    const renderCycles = (announce = false) => {
+      const dataset = archive.datasets.find(item => item.id === batch.value);
+      if (!dataset) return;
+      const all = workload.value === 'all';
+      const selectedCase = dataset.designs[0].cases.find(item => item.id === workload.value);
+      const workloadLabel = all ? 'All 12 kernels' :
+        selectedCase.r + ' × ' + selectedCase.k + ' × ' + selectedCase.n + ' · ' + selectedCase.id;
+      const results = dataset.designs.map(design => {
+        const cases = design.cases.filter(item => all || item.id === workload.value);
+        return { ...design,
+          active: cases.reduce((sum, item) => sum + item.active, 0),
+          whole: cases.reduce((sum, item) => sum + item.whole, 0)
+        };
+      });
+      const metric = counter.value;
+      const maximum = Math.max(...results.map(result => result[metric]));
+      const magnitude = 10 ** Math.floor(Math.log10(maximum || 1));
+      const ceiling = [1, 2, 2.5, 5, 10].map(step => step * magnitude)
+        .find(step => step >= maximum);
+      const activeKeys = new Set();
+      const tableRows = [];
+      results.forEach(result => {
+        const key = result.brand + ' ' + result.config;
+        activeKeys.add(key);
+        let elements = barRows.get(key);
+        if (!elements) {
+          const row = document.createElement('div');
+          row.className = 'footprint-bar-row';
+          if (result.kind === 'lumixed') row.classList.add('is-lumixed');
+          const label = document.createElement('span');
+          label.className = 'footprint-bar-label';
+          label.append(document.createTextNode(result.brand));
+          const config = document.createElement('small');
+          config.textContent = result.config;
+          label.append(config);
+          const track = document.createElement('div');
+          track.className = 'footprint-bar-track';
+          const fill = document.createElement('div');
+          fill.className = 'footprint-bar-fill';
+          track.append(fill);
+          const value = document.createElement('span');
+          value.className = 'footprint-bar-value';
+          row.append(label, track, value);
+          elements = { row, fill, value };
+          barRows.set(key, elements);
+        }
+        bars.append(elements.row);
+        elements.fill.style.width = (100 * result[metric] / ceiling) + '%';
+        elements.value.textContent = number.format(result[metric]);
+        const row = document.createElement('tr');
+        if (result.kind === 'lumixed') row.className = 'footprint-highlight';
+        const label = document.createElement('th');
+        label.scope = 'row';
+        const link = document.createElement('a');
+        link.href = archive.sourceRepository + '/blob/main/' + result.source;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = result.brand;
+        const config = document.createElement('span');
+        config.textContent = result.config;
+        label.append(link, config);
+        row.append(label);
+        for (const field of ['active', 'whole']) {
+          const value = document.createElement('td');
+          value.textContent = number.format(result[field]);
+          row.append(value);
+        }
+        tableRows.push(row);
+      });
+      for (const [key, elements] of barRows) {
+        if (!activeKeys.has(key)) { elements.row.remove(); barRows.delete(key); }
+      }
+      table.tBodies[0].replaceChildren(...tableRows);
+      table.caption.textContent = dataset.label + ' · ' + workloadLabel;
+      title.textContent = metric === 'active' ? 'Active accelerator cycles' : 'Whole-call core cycles';
+      axisMax.textContent = number.format(ceiling) + ' cycles';
+      scope.textContent = dataset.scope + (all
+        ? ' Totals cover all 12 kernels and exclude smoke checks.'
+        : ' Selected matrix: ' + workloadLabel + ' (R × K × N).');
+      note.textContent = metric === 'active'
+        ? 'Accelerator-active cycles; overlapping diagnostic counters are not added together. Lower is fewer cycles.'
+        : 'Whole-call core cycles include the surrounding software call. Lower is fewer cycles.';
+      const summary = results.map(result => result.brand + ' ' + result.config + ': ' +
+        number.format(result[metric]) + ' cycles').join('; ');
+      bars.setAttribute('aria-label', title.textContent + '. ' + summary);
+      if (announce) status.textContent = dataset.label + '. ' + workloadLabel + '. ' + summary;
+    };
+    renderCycles();
+    for (const control of [batch, workload, counter]) {
+      control.addEventListener('change', () => renderCycles(true));
+    }
+    cycleChart.hidden = false;
   }
   const fades=document.querySelectorAll('.fade');
   if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
