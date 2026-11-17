@@ -93,3 +93,20 @@
 .roadmap-next{grid-template-columns:repeat(2,minmax(0,1fr))}
 .project-intro-grid .stat strong{font-size:clamp(22px,2.5vw,36px);overflow-wrap:anywhere}
 @media(max-width:520px){.roadmap-next{grid-template-columns:1fr}}
+
+/* Routed accelerator footprint comparison. */
+.footprint-section{border-top:1px solid var(--line)}
+.footprint-table-wrap{overflow-x:auto}
+.footprint-table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.footprint-table caption{text-align:left;color:var(--muted);font-size:12px;padding-bottom:16px}
+.footprint-table th,.footprint-table td{text-align:right;padding:18px 15px;border-bottom:1px solid var(--line);white-space:nowrap}
+.footprint-table th:first-child{text-align:left}
+.footprint-table thead th{color:var(--muted);font-size:12px;font-weight:500}
+.footprint-table tbody th{font-weight:600}
+.footprint-table tbody th span{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:4px}
+.footprint-highlight{background:#a3ead40a;color:var(--mint)}
+.footprint-sources{margin-top:22px;font-size:13px;color:var(--muted)}
+.footprint-sources summary{cursor:pointer;color:var(--mint)}
+.footprint-sources p{margin-top:14px;max-width:900px}
+.footprint-sources .actions{gap:24px;margin-top:0}
+@media(max-width:800px){.footprint-table{font-size:12px}.footprint-table th,.footprint-table td{padding:14px 10px}}
