@@ -87,3 +87,9 @@
 .contact-address{font-size:14px;text-align:center;overflow-wrap:anywhere;user-select:all}
 .contact-banner .contact-status{font-size:13px;line-height:1.5;text-align:center}
 @media(max-width:800px){.contact-options{width:100%;max-width:360px}}
+
+/* Current LUMIXED evidence and next-step layout. */
+.project-evidence{display:inline-block;margin-top:18px;font-size:12px;color:var(--mint);text-decoration:underline;text-underline-offset:4px}
+.roadmap-next{grid-template-columns:repeat(2,minmax(0,1fr))}
+.project-intro-grid .stat strong{font-size:clamp(22px,2.5vw,36px);overflow-wrap:anywhere}
+@media(max-width:520px){.roadmap-next{grid-template-columns:1fr}}
