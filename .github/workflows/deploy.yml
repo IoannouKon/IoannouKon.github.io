@@ -18,6 +18,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Version styles and scripts
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import re
+          from pathlib import Path
+
+          versions = {
+              asset: hashlib.sha256(Path(asset).read_bytes()).hexdigest()[:12]
+              for asset in ("style.css", "script.js")
+          }
+          pattern = r'(?P<attr>href|src)="(?P<asset>style\.css|script\.js)(?:\?[^\"]*)?"'
+          for page in Path(".").glob("*.html"):
+              text = page.read_text(encoding="utf-8")
+              text = re.sub(pattern, lambda m: '{}="{}?v={}"'.format(
+                  m["attr"], m["asset"], versions[m["asset"]]), text)
+              page.write_text(text, encoding="utf-8")
+          PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
