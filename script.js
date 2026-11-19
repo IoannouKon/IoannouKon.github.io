@@ -39,6 +39,36 @@
       setStatus('Please select and copy the email address shown above.');
     }
   }));
+  const explorer = document.querySelector('[data-mode-explorer]');
+  if (explorer) {
+    const nav = explorer.querySelector('.mode-nav');
+    const links = [...nav.querySelectorAll('a')];
+    const panels = [...explorer.querySelectorAll('.mode-panel')];
+
+    const showMode = (hash, focus = false) => {
+      const active = panels.find(panel => '#' + panel.id === hash) || panels[0];
+      panels.forEach(panel => { panel.hidden = panel !== active; });
+      links.forEach(link => {
+        if (link.hash === '#' + active.id) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      });
+      if (focus) active.querySelector('h3').focus();
+    };
+
+    showMode(window.location.hash);
+    nav.hidden = false;
+    explorer.querySelectorAll('.mode-panel-nav').forEach(controls => { controls.hidden = false; });
+    explorer.addEventListener('click', event => {
+      const link = event.target.closest('a[href^="#datapath-"]');
+      if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      window.history.pushState(null, '', link.hash);
+      showMode(link.hash, true);
+      explorer.scrollIntoView({ block: 'start' });
+    });
+    window.addEventListener('hashchange', () => showMode(window.location.hash));
+  }
+
   const footprintChart = document.getElementById('footprint-chart');
   const footprintTable = document.querySelector('#hardware-comparison .footprint-table');
   if (footprintChart && footprintTable) {
