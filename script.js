@@ -39,21 +39,6 @@
       setStatus('Please select and copy the email address shown above.');
     }
   }));
-  const blocks = [
-    ['Host / RoCC','Rocket software configures and starts LUMIXED through custom RoCC commands. The accelerator is attached to the RISC-V system.'],
-    ['DMA & buffers','A TileLink-based DMA transfers data between system memory and local storage. Weight buffering supports prefetch and reuse.'],
-    ['Product generation','Input activations are used to generate a compact set of reusable even-valued products in LUT-style memories.'],
-    ['Select & accumulate','Weight-controlled selection, odd-product correction, sign handling, and accumulation produce matrix outputs.']
-  ];
-  const buttons=[...document.querySelectorAll('[data-arch-step]')];
-  const title=document.getElementById('arch-title');
-  const detail=document.getElementById('arch-description');
-  if (buttons.length && title && detail) {
-    buttons.forEach((button,index) => button.addEventListener('click',() => {
-      buttons.forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
-      title.textContent=blocks[index][0];detail.textContent=blocks[index][1];
-    }));
-  }
   const footprintChart = document.getElementById('footprint-chart');
   const footprintTable = document.querySelector('#hardware-comparison .footprint-table');
   if (footprintChart && footprintTable) {
