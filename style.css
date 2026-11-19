@@ -278,3 +278,61 @@
 }
 .mode-spec dt { color: #bccbc5; font-size: .875rem; }
 .mode-spec dd { margin: 4px 0 0; color: var(--datapath); }
+
+/* Dense diagram adapted from the LUMIXED dataflow figure. */
+.dense-stage {
+  position: relative;
+  padding: 12px 14px;
+  border: 1px solid #3d544e;
+  border-inline-start: 3px solid var(--datapath);
+  border-radius: 8px;
+  background: #172621;
+}
+.dense-stage + .dense-stage { margin-top: 16px; }
+.dense-stage + .dense-stage::before {
+  position: absolute;
+  top: -17px;
+  inset-inline-start: 20px;
+  height: 16px;
+  border-inline-start: 1px solid var(--datapath);
+  content: "";
+}
+.dense-stage > strong { color: var(--datapath); }
+.dense-stage p { margin-top: 3px; font-size: .875rem; color: #bccbc5; }
+.dense-banks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.dense-banks > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  text-align: center;
+  font-size: .875rem;
+}
+.dense-banks b { grid-column: 1 / -1; color: #bccbc5; text-align: start; }
+.dense-banks span {
+  padding: 3px 0;
+  border: 1px solid #4b7565;
+  border-radius: 4px;
+  background: #1e372e;
+}
+.dense-example {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 10px;
+  color: #efcb9a;
+  font-size: .875rem;
+}
+.dense-source {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--datapath);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: .875rem;
+}
