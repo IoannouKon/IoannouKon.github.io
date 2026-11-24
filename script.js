@@ -190,83 +190,57 @@
   const cycleChart = document.getElementById('llms-cycle-chart');
   const cycleData = document.getElementById('llms-cycle-data');
   if (cycleChart && cycleData) {
-    const archive = JSON.parse(cycleData.textContent);
-    const sharedGemmini = archive.datasets.find(item => item.id === 'optimized-w2')
-      ?.designs.find(design => design.kind === 'gemmini' && design.config.startsWith('8×8'));
+    const { rows } = JSON.parse(cycleData.textContent);
     const precision = document.getElementById('llms-precision');
-    const batches = {
-      W8: { id: 'earlier-w8', label: 'ID8 batch' },
-      W4: { id: 'earlier-w4', label: 'ID8 batch' },
-      W2: { id: 'optimized-w2', label: 'Optimized ID16 batch' }
-    };
     const bars = cycleChart.querySelector('[data-cycle-bars]');
-    const title = cycleChart.querySelector('[data-cycle-title]');
-    const axisMax = cycleChart.querySelector('[data-cycle-max]');
     const note = cycleChart.querySelector('[data-cycle-note]');
     const status = cycleChart.querySelector('[role="status"]');
     const number = new Intl.NumberFormat('en-US');
-    const barRows = new Map();
-    const renderCycles = (announce = false) => {
-      const batch = batches[precision.value];
-      const dataset = archive.datasets.find(item => item.id === batch.id);
-      if (!dataset) return;
-      const designs = [...dataset.designs];
-      if (sharedGemmini && !designs.includes(sharedGemmini)) designs.push(sharedGemmini);
-      const results = designs.map(design => ({
-        ...design,
-        sharedReference: design === sharedGemmini,
-        whole: design.cases.reduce((sum, item) => sum + item.whole, 0)
-      }));
-      const maximum = Math.max(...results.map(result => result.whole));
-      const magnitude = 10 ** Math.floor(Math.log10(maximum || 1));
-      const ceiling = [1, 2, 2.5, 5, 10].map(step => step * magnitude)
-        .find(step => step >= maximum);
-      const activeKeys = new Set();
-      results.forEach(result => {
-        const key = result.brand + ' ' + result.config;
-        activeKeys.add(key);
-        let elements = barRows.get(key);
-        if (!elements) {
-          const row = document.createElement('div');
-          row.className = 'footprint-bar-row';
-          if (result.kind === 'lumixed') row.classList.add('is-lumixed');
-          const label = document.createElement('span');
-          label.className = 'footprint-bar-label';
-          label.append(document.createTextNode(result.brand));
-          const config = document.createElement('small');
-          config.textContent = result.config + (result.sharedReference ? ' · Shared reference' : '');
-          label.append(config);
+
+    const renderCycles = () => {
+      const bits = Number(precision.value);
+      const results = rows.filter(row => row.bits === bits);
+      const maximum = Math.max(...results.flatMap(row => [row.off, row.on]));
+      const comparisons = results.map(result => {
+        const row = document.createElement('div');
+        row.className = 'qwen-cycle-pair';
+        const config = document.createElement('strong');
+        config.className = 'footprint-bar-label';
+        config.textContent = result.config;
+        row.append(config);
+
+        for (const [mode, label, cycles] of [
+          ['qwen-unscaled', 'Group scaling off', result.off],
+          ['qwen-scaled', 'Group scaling on', result.on]
+        ]) {
           const track = document.createElement('div');
           track.className = 'footprint-bar-track';
+          track.setAttribute('aria-hidden', 'true');
           const fill = document.createElement('div');
-          fill.className = 'footprint-bar-fill';
+          fill.className = 'footprint-bar-fill ' + mode;
+          fill.style.width = (100 * cycles / maximum) + '%';
           track.append(fill);
           const value = document.createElement('span');
           value.className = 'footprint-bar-value';
-          row.append(label, track, value);
-          elements = { row, fill, value };
-          barRows.set(key, elements);
+          value.textContent = number.format(cycles);
+          value.setAttribute('aria-label', label + ': ' + value.textContent + ' cycles');
+          row.append(track, value);
         }
-        bars.append(elements.row);
-        elements.fill.style.width = (100 * result.whole / ceiling) + '%';
-        elements.value.textContent = number.format(result.whole);
+        return row;
       });
-      for (const [key, elements] of barRows) {
-        if (!activeKeys.has(key)) { elements.row.remove(); barRows.delete(key); }
-      }
-      title.textContent = 'Whole-call core cycles';
-      axisMax.textContent = number.format(ceiling) + ' cycles';
-      note.textContent = 'FP16 activations · ' + batch.label + ' · Total across 12 workloads';
-      const summary = results.map(result => result.brand + ' ' + result.config +
-        (result.sharedReference ? ' (shared reference)' : '') + ': ' +
-        number.format(result.whole) + ' cycles').join('; ');
-      bars.setAttribute('aria-label', title.textContent + '. ' + summary);
-      if (announce) status.textContent = precision.value + '. ' + note.textContent + '. ' + summary;
+      bars.replaceChildren(...comparisons);
+      const groupSize = bits === 2 ? 64 : 32;
+      note.textContent = 'FP32 activations · Four activation rows · Deferred group scaling with FP16 scales and G = ' + groupSize;
     };
+
     renderCycles();
-    precision.addEventListener('change', () => renderCycles(true));
+    precision.addEventListener('change', () => {
+      renderCycles();
+      status.textContent = 'Showing W' + precision.value + ' projection estimates.';
+    });
     cycleChart.hidden = false;
   }
+
   const fades=document.querySelectorAll('.fade');
   if('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
     const observer=new IntersectionObserver(entries => entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}}),{threshold:.08});

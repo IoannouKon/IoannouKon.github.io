@@ -387,3 +387,18 @@
 .figure-viewer button:hover, .figure-viewer-tools a:hover { border-color: var(--mint); }
 .figure-viewer :is(button, a):focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
 .figure-viewer [data-figure-count] { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* Paired Qwen projection estimates */
+.qwen-cycle-legend { display: flex; flex-wrap: wrap; gap: 8px 24px; list-style: none; padding: 0; margin: 0 0 22px; }
+.qwen-cycle-legend li { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .875rem; }
+.qwen-swatch { width: 12px; height: 12px; border-radius: 3px; }
+.qwen-scaled { background: var(--mint); }
+.qwen-unscaled { background: #6b8d7e; }
+.qwen-cycle-bars { gap: 20px; }
+.qwen-cycle-pair { display: grid; grid-template-columns: minmax(150px, auto) minmax(0, 1fr) auto; gap: 5px 14px; align-items: center; }
+.qwen-cycle-pair > strong { grid-row: span 2; }
+.qwen-cycle-pair .footprint-bar-track { height: 16px; }
+@media (max-width: 650px) {
+  .qwen-cycle-pair { grid-template-columns: minmax(0, 1fr) auto; }
+  .qwen-cycle-pair > strong { grid-column: 1 / -1; grid-row: auto; }
+  .qwen-cycle-pair .footprint-bar-track, .qwen-cycle-pair .footprint-bar-value { grid-row: auto; grid-column: auto; }
+}
