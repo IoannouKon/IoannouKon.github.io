@@ -133,6 +133,7 @@
     // The exact-values table is the single source for all plotted values.
     const designs = Array.from(footprintTable.tBodies[0].rows, row => ({
       name: row.cells[0].firstChild.textContent.trim(),
+      config: row.cells[0].querySelector('span')?.textContent.trim(),
       highlight: row.classList.contains('footprint-highlight'),
       values: Object.fromEntries(Object.entries(metrics).map(([key, metric]) => [
         key, Number(row.cells[metric.column].textContent.replace(/[^\d.]/g, ''))
@@ -148,6 +149,11 @@
         const label = document.createElement('span');
         label.className = 'footprint-bar-label';
         label.textContent = design.name;
+        if (design.highlight && design.config) {
+          const config = document.createElement('small');
+          config.textContent = design.config;
+          label.append(config);
+        }
         const track = document.createElement('div');
         track.className = 'footprint-bar-track';
         const fill = document.createElement('div');
@@ -173,7 +179,7 @@
           rows[index].value.textContent = format(design.values[key]);
         });
         const summary = metric.label + ': ' + designs.map(design =>
-          design.name + ' ' + format(design.values[key])).join('; ') + '.';
+          design.name + (design.highlight && design.config ? ' (' + design.config + ')' : '') + ' ' + format(design.values[key])).join('; ') + '.';
         bars.setAttribute('aria-label', summary);
         caption.textContent = metric.label;
         axisMax.textContent = format(ceiling);
