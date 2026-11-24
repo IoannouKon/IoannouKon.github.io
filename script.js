@@ -190,7 +190,7 @@
   const cycleChart = document.getElementById('llms-cycle-chart');
   const cycleData = document.getElementById('llms-cycle-data');
   if (cycleChart && cycleData) {
-    const { rows } = JSON.parse(cycleData.textContent);
+    const { rows, gemmini } = JSON.parse(cycleData.textContent);
     const precision = document.getElementById('llms-precision');
     const bars = cycleChart.querySelector('[data-cycle-bars]');
     const note = cycleChart.querySelector('[data-cycle-note]');
@@ -200,19 +200,20 @@
     const renderCycles = () => {
       const bits = Number(precision.value);
       const results = rows.filter(row => row.bits === bits);
-      const maximum = Math.max(...results.flatMap(row => [row.off, row.on]));
-      const comparisons = results.map(result => {
+      const maximum = Math.max(
+        ...results.flatMap(row => [row.off, row.on]),
+        ...gemmini.map(reference => reference.cycles)
+      );
+
+      const makeRow = (label, entries) => {
         const row = document.createElement('div');
-        row.className = 'qwen-cycle-pair';
+        row.className = entries.length === 1 ? 'qwen-cycle-pair qwen-reference-row' : 'qwen-cycle-pair';
         const config = document.createElement('strong');
         config.className = 'footprint-bar-label';
-        config.textContent = result.config;
+        config.textContent = label;
         row.append(config);
 
-        for (const [mode, label, cycles] of [
-          ['qwen-unscaled', 'Group scaling off', result.off],
-          ['qwen-scaled', 'Group scaling on', result.on]
-        ]) {
+        for (const [mode, series, cycles] of entries) {
           const track = document.createElement('div');
           track.className = 'footprint-bar-track';
           track.setAttribute('aria-hidden', 'true');
@@ -223,12 +224,20 @@
           const value = document.createElement('span');
           value.className = 'footprint-bar-value';
           value.textContent = number.format(cycles);
-          value.setAttribute('aria-label', label + ': ' + value.textContent + ' cycles');
+          value.setAttribute('aria-label', series + ': ' + value.textContent + ' cycles');
           row.append(track, value);
         }
         return row;
-      });
-      bars.replaceChildren(...comparisons);
+      };
+
+      const comparisons = results.map(result => makeRow(result.config, [
+        ['qwen-unscaled', 'Group scaling off', result.off],
+        ['qwen-scaled', 'Group scaling on', result.on]
+      ]));
+      const references = gemmini.map(reference => makeRow(reference.config, [
+        ['qwen-gemmini', 'Gemmini W8 reference', reference.cycles]
+      ]));
+      bars.replaceChildren(...comparisons, ...references);
       const groupSize = bits === 2 ? 64 : 32;
       note.textContent = 'FP32 activations · Four activation rows · Deferred group scaling with FP16 scales and G = ' + groupSize;
     };

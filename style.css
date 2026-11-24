@@ -393,9 +393,11 @@
 .qwen-swatch { width: 12px; height: 12px; border-radius: 3px; }
 .qwen-scaled { background: var(--mint); }
 .qwen-unscaled { background: #6b8d7e; }
+.qwen-gemmini { background: #d6ad80; }
 .qwen-cycle-bars { gap: 20px; }
-.qwen-cycle-pair { display: grid; grid-template-columns: minmax(150px, auto) minmax(0, 1fr) auto; gap: 5px 14px; align-items: center; }
+.qwen-cycle-pair { display: grid; grid-template-columns: minmax(170px, 22%) minmax(0, 1fr) 110px; gap: 5px 14px; align-items: center; }
 .qwen-cycle-pair > strong { grid-row: span 2; }
+.qwen-reference-row > strong { grid-row: auto; }
 .qwen-cycle-pair .footprint-bar-track { height: 16px; }
 @media (max-width: 650px) {
   .qwen-cycle-pair { grid-template-columns: minmax(0, 1fr) auto; }
