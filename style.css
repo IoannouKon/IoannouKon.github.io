@@ -336,3 +336,54 @@
   text-underline-offset: 3px;
   font-size: .875rem;
 }
+/* Technical figure gallery */
+.schematic-card [data-figure-open] { display: block; cursor: zoom-in; }
+.schematic-card [data-figure-open]:focus-visible { outline: 2px solid var(--mint); outline-offset: -3px; }
+.figure-viewer {
+  box-sizing: border-box;
+  width: min(1040px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid #4b6e60;
+  border-radius: 16px;
+  background: #14201c;
+  color: var(--ink);
+  box-shadow: 0 24px 100px #0009;
+}
+.figure-viewer[open] { display: flex; flex-direction: column; }
+.figure-viewer::backdrop { background: #050b09d9; backdrop-filter: blur(5px); }
+.figure-viewer-header, .figure-viewer-tools, .figure-viewer-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.figure-viewer-header, .figure-viewer-tools { justify-content: space-between; padding: 12px clamp(12px, 3vw, 24px); }
+.figure-viewer-header h2 { font-size: clamp(1rem, 3.5vw, 1.4rem); }
+.figure-viewer-stage { min-height: 0; overflow: auto; padding: 12px clamp(12px, 3vw, 24px); background: #0b1411; }
+.figure-viewer-stage img {
+  display: block;
+  width: 100%;
+  height: min(62dvh, 660px);
+  object-fit: contain;
+  padding: 8px;
+  border-radius: 8px;
+  background: #fff;
+}
+.figure-viewer button, .figure-viewer-tools a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid #4b6e60;
+  border-radius: 8px;
+  background: #1b3028;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: .875rem;
+}
+.figure-viewer button:hover, .figure-viewer-tools a:hover { border-color: var(--mint); }
+.figure-viewer :is(button, a):focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+.figure-viewer [data-figure-count] { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }

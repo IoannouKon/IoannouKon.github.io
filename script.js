@@ -69,6 +69,50 @@
     window.addEventListener('hashchange', () => showMode(window.location.hash));
   }
 
+  const figureViewer = document.getElementById('figure-viewer');
+  if (figureViewer && typeof figureViewer.showModal === 'function') {
+    const figures = [...document.querySelectorAll('.schematics [data-figure-open]')];
+    const image = figureViewer.querySelector('img');
+    const title = figureViewer.querySelector('#figure-title');
+    const count = figureViewer.querySelector('[data-figure-count]');
+    const original = figureViewer.querySelector('[data-figure-original]');
+    let current = 0;
+    let opener;
+
+    const showFigure = index => {
+      current = (index + figures.length) % figures.length;
+      const figure = figures[current];
+      title.textContent = figure.querySelector('.schematic-caption').firstChild.textContent.trim();
+      image.alt = figure.querySelector('img').alt;
+      image.src = figure.href;
+      original.href = figure.href;
+      count.textContent = (current + 1) + ' / ' + figures.length;
+    };
+
+    document.querySelectorAll('[data-figure-open]').forEach(link => {
+      link.addEventListener('click', event => {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const index = figures.findIndex(figure => figure.href === link.href);
+        if (index === -1) return;
+        event.preventDefault();
+        opener = link;
+        showFigure(index);
+        figureViewer.showModal();
+      });
+    });
+    figureViewer.querySelector('[data-figure-prev]').addEventListener('click', () => showFigure(current - 1));
+    figureViewer.querySelector('[data-figure-next]').addEventListener('click', () => showFigure(current + 1));
+    figureViewer.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      showFigure(current + (event.key === 'ArrowLeft' ? -1 : 1));
+    });
+    figureViewer.addEventListener('click', event => {
+      if (event.target === figureViewer) figureViewer.close();
+    });
+    figureViewer.addEventListener('close', () => opener?.focus());
+  }
+
   const footprintChart = document.getElementById('footprint-chart');
   const footprintTable = document.querySelector('#hardware-comparison .footprint-table');
   if (footprintChart && footprintTable) {
