@@ -147,8 +147,12 @@
   const cycleData = document.getElementById('llms-cycle-data');
   if (cycleChart && cycleData) {
     const archive = JSON.parse(cycleData.textContent);
-    const batch = document.getElementById('llms-batch');
-    const workload = document.getElementById('llms-workload');
+    const precision = document.getElementById('llms-precision');
+    const batches = {
+      W8: { id: 'earlier-w8', label: 'ID8 batch' },
+      W4: { id: 'earlier-w4', label: 'ID8 batch' },
+      W2: { id: 'optimized-w2', label: 'Optimized ID16 batch' }
+    };
     const bars = cycleChart.querySelector('[data-cycle-bars]');
     const title = cycleChart.querySelector('[data-cycle-title]');
     const axisMax = cycleChart.querySelector('[data-cycle-max]');
@@ -157,18 +161,13 @@
     const number = new Intl.NumberFormat('en-US');
     const barRows = new Map();
     const renderCycles = (announce = false) => {
-      const dataset = archive.datasets.find(item => item.id === batch.value);
+      const batch = batches[precision.value];
+      const dataset = archive.datasets.find(item => item.id === batch.id);
       if (!dataset) return;
-      const all = workload.value === 'all';
-      const selectedCase = dataset.designs[0].cases.find(item => item.id === workload.value);
-      const workloadLabel = all ? 'All 12 kernels' :
-        selectedCase.r + ' × ' + selectedCase.k + ' × ' + selectedCase.n + ' · ' + selectedCase.id;
-      const results = dataset.designs.map(design => {
-        const cases = design.cases.filter(item => all || item.id === workload.value);
-        return { ...design,
-          whole: cases.reduce((sum, item) => sum + item.whole, 0)
-        };
-      });
+      const results = dataset.designs.map(design => ({
+        ...design,
+        whole: design.cases.reduce((sum, item) => sum + item.whole, 0)
+      }));
       const maximum = Math.max(...results.map(result => result.whole));
       const magnitude = 10 ** Math.floor(Math.log10(maximum || 1));
       const ceiling = [1, 2, 2.5, 5, 10].map(step => step * magnitude)
@@ -208,16 +207,14 @@
       }
       title.textContent = 'Whole-call core cycles';
       axisMax.textContent = number.format(ceiling) + ' cycles';
-      note.textContent = 'Lower is fewer cycles.';
+      note.textContent = 'FP16 activations · ' + batch.label + ' · Total across 12 workloads';
       const summary = results.map(result => result.brand + ' ' + result.config + ': ' +
         number.format(result.whole) + ' cycles').join('; ');
       bars.setAttribute('aria-label', title.textContent + '. ' + summary);
-      if (announce) status.textContent = dataset.label + '. ' + workloadLabel + '. ' + summary;
+      if (announce) status.textContent = precision.value + '. ' + note.textContent + '. ' + summary;
     };
     renderCycles();
-    for (const control of [batch, workload]) {
-      control.addEventListener('change', () => renderCycles(true));
-    }
+    precision.addEventListener('change', () => renderCycles(true));
     cycleChart.hidden = false;
   }
   const fades=document.querySelectorAll('.fade');
