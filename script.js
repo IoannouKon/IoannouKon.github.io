@@ -147,6 +147,8 @@
   const cycleData = document.getElementById('llms-cycle-data');
   if (cycleChart && cycleData) {
     const archive = JSON.parse(cycleData.textContent);
+    const sharedGemmini = archive.datasets.find(item => item.id === 'optimized-w2')
+      ?.designs.find(design => design.kind === 'gemmini' && design.config.startsWith('8×8'));
     const precision = document.getElementById('llms-precision');
     const batches = {
       W8: { id: 'earlier-w8', label: 'ID8 batch' },
@@ -164,8 +166,11 @@
       const batch = batches[precision.value];
       const dataset = archive.datasets.find(item => item.id === batch.id);
       if (!dataset) return;
-      const results = dataset.designs.map(design => ({
+      const designs = [...dataset.designs];
+      if (sharedGemmini && !designs.includes(sharedGemmini)) designs.push(sharedGemmini);
+      const results = designs.map(design => ({
         ...design,
+        sharedReference: design === sharedGemmini,
         whole: design.cases.reduce((sum, item) => sum + item.whole, 0)
       }));
       const maximum = Math.max(...results.map(result => result.whole));
@@ -185,7 +190,7 @@
           label.className = 'footprint-bar-label';
           label.append(document.createTextNode(result.brand));
           const config = document.createElement('small');
-          config.textContent = result.config;
+          config.textContent = result.config + (result.sharedReference ? ' · Shared reference' : '');
           label.append(config);
           const track = document.createElement('div');
           track.className = 'footprint-bar-track';
@@ -208,7 +213,8 @@
       title.textContent = 'Whole-call core cycles';
       axisMax.textContent = number.format(ceiling) + ' cycles';
       note.textContent = 'FP16 activations · ' + batch.label + ' · Total across 12 workloads';
-      const summary = results.map(result => result.brand + ' ' + result.config + ': ' +
+      const summary = results.map(result => result.brand + ' ' + result.config +
+        (result.sharedReference ? ' (shared reference)' : '') + ': ' +
         number.format(result.whole) + ' cycles').join('; ');
       bars.setAttribute('aria-label', title.textContent + '. ' + summary);
       if (announce) status.textContent = precision.value + '. ' + note.textContent + '. ' + summary;
